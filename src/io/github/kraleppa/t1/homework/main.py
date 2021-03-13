@@ -1,5 +1,7 @@
 import sys
-from server import Server
+import socket
+from connection import Connection
+from client_repository import ClientRepository
 
 if len(sys.argv) == 3:
     IP_ADDRESS = str(sys.argv[1])
@@ -8,5 +10,15 @@ else:
     IP_ADDRESS = "127.0.0.1"
     PORT = 8080
 
-server = Server(IP_ADDRESS, PORT)
+server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+server.bind((IP_ADDRESS, PORT))
+server.listen(100)
 
+client_repository = ClientRepository()
+
+while True:
+    connection, address = server.accept()
+    thread = Connection(connection, address, client_repository)
+    client_repository.add_client(thread)
+    thread.start()
