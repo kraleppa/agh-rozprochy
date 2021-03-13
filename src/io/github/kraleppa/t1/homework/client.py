@@ -1,25 +1,37 @@
 import socket
 import sys
 from threading import Thread
+from image import image
 
 working = True
 
 
-def sender():
+def receiver_tcp():
     while working:
-        message = str(socket.recv(2048), 'utf-8')
+        message = str(tcp_client.recv(2048), 'utf-8')
         print(message)
-    socket.close()
+    tcp_client.close()
 
 
-def receiver():
+def sender():
     global working
     while working:
         message = input()
         if message == '/quit':
             working = False
             print("Closing...")
-        socket.send(bytes(message, 'utf-8'))
+            tcp_client.send(bytes(message, 'utf-8'))
+            udp_client.sendto(bytes(message, 'utf-8'), (IP_ADDRESS, PORT))
+        elif message == 'U':
+            udp_client.sendto(bytes(image, 'utf-8'), (IP_ADDRESS, PORT))
+        else:
+            tcp_client.send(bytes(message, 'utf-8'))
+
+
+def receiver_udp():
+    while working:
+        buff, address = udp_client.recvfrom(2048)
+        print(str(buff, 'utf-8'))
 
 
 if len(sys.argv) == 3:
@@ -32,12 +44,17 @@ else:
 print("Podaj swój nick: ")
 nick = input()
 
-socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-socket.connect((IP_ADDRESS, PORT))
-socket.send(bytes(nick, 'utf-8'))
+tcp_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+tcp_client.connect((IP_ADDRESS, PORT))
+tcp_client.send(bytes(nick, 'utf-8'))
+
+udp_client = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+udp_client.sendto(bytes("Hello", 'utf-8'), (IP_ADDRESS, PORT))
 
 Thread(target=sender).start()
-Thread(target=receiver).start()
+Thread(target=receiver_tcp).start()
+Thread(target=receiver_udp).start()
 
 while working:
     pass
+

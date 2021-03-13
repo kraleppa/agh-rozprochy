@@ -11,7 +11,6 @@ class Connection(Thread):
 
     def run(self):
         self.nick = str(self.connection.recv(2048), 'utf-8').strip()
-        print(type(self.connection))
 
         while True:
             message = str(self.connection.recv(2048), 'utf-8')

@@ -1,7 +1,8 @@
 import sys
 import socket
 from connection import Connection
-from client_server import ClientServer
+from client_repository import ClientRepository
+from udp_server import UdpServer
 
 if len(sys.argv) == 3:
     IP_ADDRESS = str(sys.argv[1])
@@ -14,8 +15,9 @@ server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 server.bind((IP_ADDRESS, PORT))
 server.listen(100)
+client_repository = ClientRepository()
 
-client_repository = ClientServer()
+UdpServer(IP_ADDRESS, PORT).start()
 
 while True:
     connection, address = server.accept()
