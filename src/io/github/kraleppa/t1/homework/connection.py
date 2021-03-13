@@ -10,15 +10,14 @@ class Connection(Thread):
         self.nick = None
 
     def run(self):
-        self.connection.send(bytes("Witajcie! Podaj swój nick: ", 'utf-8'))
         self.nick = str(self.connection.recv(2048), 'utf-8').strip()
         print(type(self.connection))
 
         while True:
             message = str(self.connection.recv(2048), 'utf-8')
             if message.strip() == "/quit":
+                self.connection.send(bytes("Closed", 'utf-8'))
                 self.client_repository.remove_client(self)
-                self.connection.close()
                 return
             self.client_repository.broadcast(self, message)
 
