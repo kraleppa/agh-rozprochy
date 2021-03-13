@@ -11,7 +11,7 @@ class Connection(Thread):
 
     def run(self):
         self.connection.send(bytes("Witajcie! Podaj swój nick: ", 'utf-8'))
-        self.nick = str(self.connection.recv(2048), 'utf-8')
+        self.nick = str(self.connection.recv(2048), 'utf-8').strip()
         print(type(self.connection))
 
         while True:
@@ -20,6 +20,6 @@ class Connection(Thread):
                 self.client_repository.remove_client(self)
                 self.connection.close()
                 return
-            print(message)
+            self.client_repository.broadcast(self, message)
 
 

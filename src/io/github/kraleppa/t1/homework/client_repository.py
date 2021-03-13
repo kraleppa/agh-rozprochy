@@ -16,3 +16,8 @@ class ClientRepository:
             with self.lock:
                 self.connected_clients.remove(client)
         print(self.connected_clients)
+
+    def broadcast(self, sender, message):
+        for client in self.connected_clients:
+            if client != sender:
+                client.connection.send(bytes(f"{sender.nick}: {message}", 'utf-8'))
