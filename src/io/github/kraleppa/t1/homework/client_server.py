@@ -1,7 +1,7 @@
 import threading
 
 
-class ClientRepository:
+class ClientServer:
     def __init__(self):
         self.connected_clients = []
         self.lock = threading.Lock()

@@ -1,7 +1,7 @@
 import sys
 import socket
 from connection import Connection
-from client_repository import ClientRepository
+from client_server import ClientServer
 
 if len(sys.argv) == 3:
     IP_ADDRESS = str(sys.argv[1])
@@ -15,7 +15,7 @@ server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 server.bind((IP_ADDRESS, PORT))
 server.listen(100)
 
-client_repository = ClientRepository()
+client_repository = ClientServer()
 
 while True:
     connection, address = server.accept()
