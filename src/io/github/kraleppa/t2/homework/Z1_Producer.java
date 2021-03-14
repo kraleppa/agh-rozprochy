@@ -9,6 +9,8 @@ import java.io.InputStreamReader;
 
 public class Z1_Producer {
 
+    private static final BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+
     public static void main(String[] argv) throws Exception {
 
         // info
@@ -22,13 +24,16 @@ public class Z1_Producer {
 
         // queue
         String QUEUE_NAME = "queue1";
-        channel.queueDeclare(QUEUE_NAME, false, false, false, null);        
+        channel.queueDeclare(QUEUE_NAME, false, false, false, null);
 
         // producer (publish msg)
-        String message = "Hello world!";
 
-        channel.basicPublish("", QUEUE_NAME, null, message.getBytes());
-        System.out.println("Sent: " + message);
+        while(true) {
+            String message = br.readLine();
+            if(message.equals("exit"))break;
+            channel.basicPublish("", QUEUE_NAME, null, message.getBytes());
+            System.out.println("Sent: " + message);
+        }
 
         // close
         channel.close();
