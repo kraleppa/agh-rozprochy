@@ -1,4 +1,4 @@
-package io.github.kraleppa.t2.homework;
+package io.github.kraleppa.t2.lab;
 
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
