@@ -1,54 +1,56 @@
 package io.github.kraleppa.t2.homework;
 
-import com.rabbitmq.client.BuiltinExchangeType;
-import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.Connection;
-import com.rabbitmq.client.ConnectionFactory;
+import com.rabbitmq.client.*;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 
 public class Crew {
     private static final BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
     private final static String productExchange = "products";
+    private final static String messageExchange = "messages";
+    private static String name = "";
 
     public static void main(String[] argv) throws Exception {
+        System.out.println("Podaj nazwe ekipy: ");
+        String name = br.readLine();
 
-        // info
-        System.out.println("Z2 PRODUCER");
-
-        // connection & channel
         ConnectionFactory factory = new ConnectionFactory();
         factory.setHost("localhost");
         Connection connection = factory.newConnection();
         Channel channel = connection.createChannel();
 
-        // exchange
-        channel.exchangeDeclare(productExchange, BuiltinExchangeType.DIRECT);
+        channel.exchangeDeclare(messageExchange, BuiltinExchangeType.DIRECT);
+
+        channel.queueDeclare(name + "_queue", false, false, false, null);
+        channel.queueBind(name + "_queue", messageExchange, name);
+        channel.queueBind(name + "_queue", messageExchange, "crews");
+        channel.queueBind(name + "_queue", messageExchange, "all");
+
+        Consumer consumer = new DefaultConsumer(channel) {
+            @Override
+            public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
+                String message = new String(body, StandardCharsets.UTF_8);
+                System.out.println("Received: " + message);
+                channel.basicAck(envelope.getDeliveryTag(), false);
+            }
+        };
+
+
+        channel.basicConsume(name + "_queue", false, consumer);
 
         while (true) {
 
             // read msg
             System.out.println("Enter key: ");
             String key = br.readLine();
-            System.out.println("Enter message: ");
-            String message = br.readLine();
-            if (message.equals("exit")) {
+            if (key.equals("exit")) {
                 break;
             }
-
-            if (message.equals("SPAM")){
-                for (int i = 0; i < 10; i++){
-                    int integer = ((i % 2) * 4) + 1;
-                    channel.basicPublish(productExchange, key, null, Integer.toString(integer).getBytes());
-                }
-                continue;
-
-            }
-
             // publish
-            channel.basicPublish(productExchange, key, null, message.getBytes("UTF-8"));
-            System.out.println("Sent: " + message);
+            channel.basicPublish(productExchange, key, null, name.getBytes(StandardCharsets.UTF_8));
         }
     }
 }
